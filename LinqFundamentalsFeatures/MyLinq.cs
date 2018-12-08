@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LinqFundamentalsFeatures
 {
-	// My custom extension methods
+	// My custom extension methods but there could be name collision.
 	public static class MyLinq
 	{
 		public static int Count<T>(this IEnumerable<T> sequence)
