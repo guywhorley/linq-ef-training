@@ -18,5 +18,10 @@ namespace LinqFundamentalsFeatures
 			}
 			return count;
 		}
+
+		public static string LoremIpsum(this string value)
+		{
+			return $"{value} Lorem Ipsum valor...";
+		}
 	}
 }
