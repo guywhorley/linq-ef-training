@@ -15,23 +15,48 @@ namespace Queries
 			InitMovieData();
 			Console.WriteLine("Showing by year >= 2000");
 			ShowAfter2000();
-			Console.WriteLine("Showing by Drama");
-			ShowByCategory(CATEGORIES.Drama);
+			//Console.WriteLine("Showing by Drama");
+			//ShowByCategory(CATEGORIES.Drama);
 		}
 
 		#region private
-
+		
 		private static void ShowAfter2000()
-		{
-			var query = _movies.Where(m => m.Year >= 2000).OrderBy(e => e.Year);
-			foreach (var movie in query)
+		{	
+			// extension methods - define the query
+			var query = _movies
+				.Where(m => m.Year >= 2000)
+				.OrderByDescending(m => m.Rating);
+
+			//.ToList(); // <== This 'turns off' deferred execution.
+			
+			// any .To<Something> will immediately run the query and place the results into the list.
+			// No more query wil be run at this point whenever referencing query in later code execute the query.
+
+			//foreach (var movie in query) { Console.WriteLine(ToJson(movie as object)); }
+
+			// Count is not a deferred operation!!!
+			//Console.WriteLine($"Query Count: {query.Count()}");
+
+			try
 			{
-				Console.WriteLine(ToJson(movie as object));
+				var enumerator = query.GetEnumerator();
+				while (enumerator.MoveNext())
+				{
+					Console.WriteLine(enumerator.Current.Title);
+				}
 			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+
 		}
 
 		private static void ShowByCategory(CATEGORIES category)
 		{
+			// extension method
 			var query = _movies.Where(m => m.Category == category).OrderBy(m => m.Title);
 			foreach (var movie in query)
 			{
