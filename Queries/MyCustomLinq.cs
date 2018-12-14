@@ -8,6 +8,16 @@ namespace Queries
 {
 	public static class MyCustomLinq
 	{
+
+		public static IEnumerable<double> Random()
+		{
+			var random = new Random();
+			while (true)
+			{
+				yield return random.NextDouble();
+			}
+		}
+
 		// A TEMPLATE FOR HOW TO CREATE A LINQ EXTENSION METHOD
 		// my custom filter, takes in a function and returns a bool
 		public static IEnumerable<T> Filter<T>(this IEnumerable<T> source,

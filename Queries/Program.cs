@@ -15,12 +15,26 @@ namespace Queries
 			InitMovieData();
 			Console.WriteLine("Showing by year >= 2000");
 			ShowAfter2000();
+			Infinite();
+
 			//Console.WriteLine("Showing by Drama");
 			//ShowByCategory(CATEGORIES.Drama);
 		}
 
 		#region private
+
+		private static void Infinite()
+		{
+			var numbers = MyCustomLinq.Random().Where(n => n > 0.5).Take(10);
+			foreach (var number in numbers)
+			{
+				Console.WriteLine(number);
+			}
+
+		}
+
 		
+
 		private static void ShowAfter2000()
 		{	
 			// extension methods - define the query
@@ -28,8 +42,10 @@ namespace Queries
 				.Where(m => m.Year >= 2000)
 				.OrderByDescending(m => m.Rating);
 
-			//.ToList(); // <== This 'turns off' deferred execution.
 			
+
+			//.ToList(); // <== This 'turns off' deferred execution.
+
 			// any .To<Something> will immediately run the query and place the results into the list.
 			// No more query wil be run at this point whenever referencing query in later code execute the query.
 
