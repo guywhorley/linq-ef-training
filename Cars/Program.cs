@@ -15,6 +15,7 @@ namespace Cars
 		
 			// transform csv into car objects
 			var cars = ProcessCars("fuel.csv");
+			var manufacturers = ProcessManufacturers("manufacturers.csv");
 
 			// query syntax
 			var query1 =
@@ -53,43 +54,55 @@ namespace Cars
 			Console.WriteLine($"All cars are Ford: {result}");
 
 			// Transform cars from one structure into another
-			var transformed = cars.Select(c => new {c.Name, c.Manufacturer, c.Combined});
-			foreach (var car in transformed.Take(10))
-			{
-				Console.WriteLine($"car: [Name:{car.Name}] [Maker:{car.Manufacturer}] [Combined:{car.Combined} mpg]");
-			}
-			
-			return;
+			//var transformed = cars.Select(c => new {c.Name, c.Manufacturer, c.Combined});
+			//foreach (var car in transformed.Take(10))
+			//{
+			//	Console.WriteLine($"car: [Name:{car.Name}] [Maker:{car.Manufacturer}] [Combined:{car.Combined} mpg]");
+			//}
 			
 			// extension-method syntax
 			//var query1 = cars.OrderByDescending(c => c.Combined)
 			// .ThenBy(c => c.Name); // secondary sort
 
-			foreach (var car in query1.Take(10))
-			{
-				Console.WriteLine($"{car.Name} : {car.Combined}");
-			}
+			//foreach (var car in query1.Take(10))
+			//{
+			//	Console.WriteLine($"{car.Name} : {car.Combined}");
+			//}
 
-			//return;
-
-
-			var manufacturers = ProcessManufacturers("manufacturers.csv");
-			var query =
+			
+			// QUERY-SYNTAX
+			// INNER JOIN - IF right side is missing (i.e. no match on m.Name), it does not make it to the final results;
+			var car_man =
 				from car in cars
-				where car.Manufacturer == "BMW" && car.Year == 2016
+				join m in manufacturers 
+					on car.Manufacturer equals m.Name // must use 'equals' keyword on the join 'on'
 				orderby car.Combined descending, car.Name ascending
-				select new //transform
+				select new //transform into a projection which now has Headquarters
 				{
-					car.Manufacturer,
+					m.Headquarters,
 					car.Name,
 					car.Combined
 				};
 
-			foreach (var car in query.Take(10))
-			{
-				Console.WriteLine($"{car.Manufacturer} {car.Name} : {car.Combined}");
-			}
+			// EXTENSION-METHOD SYNTAX
+			// JOIN SYNTAX
+			var car_man_alt =
+				cars.Join(manufacturers, // 1. Join cars to manufacturers
+							c => c.Manufacturer, // 2. user these two props to link the tables
+							m => m.Name, 
+							(c, m) => new // 3. create a new third object to contain the following
+							{
+								m.Headquarters,
+								c.Name,
+								c.Combined
+							}) // now, you can contine but you must use the new third object
+					.OrderByDescending(c => c.Combined)
+					.ThenBy(c => c.Name);
+
+			foreach (var car in car_man_alt.Take(10)) { Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}"); }
+
 		}
+
 
 		private static List<Car> ProcessCars(string path)
 		{
