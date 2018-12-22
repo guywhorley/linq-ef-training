@@ -85,7 +85,7 @@ namespace Cars
 					car.Combined
 				};
 
-			// JOIN EXTENSION-METHOD SYNTAX - THe pattern to follow!!!
+			// JOIN EXTENSION-METHOD SYNTAX - A slightly more complex join pattern
 			var car_man_alt =
 				cars.Join(manufacturers, // 1. Join cars to manufacturers
 							c => c.Manufacturer, // 2. user these two props to link the tables
