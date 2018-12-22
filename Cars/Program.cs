@@ -53,6 +53,7 @@ namespace Cars
 			result = cars.All(c => c.Manufacturer == "Ford");
 			Console.WriteLine($"All cars are Ford: {result}");
 
+			// TRANSFORM INLINE ANONYMOUS OBJECT (a custom DTO)
 			// Transform cars from one structure into another
 			//var transformed = cars.Select(c => new {c.Name, c.Manufacturer, c.Combined});
 			//foreach (var car in transformed.Take(10))
@@ -102,7 +103,6 @@ namespace Cars
 			foreach (var car in car_man_alt.Take(10)) { Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}"); }
 
 		}
-
 
 		private static List<Car> ProcessCars(string path)
 		{
