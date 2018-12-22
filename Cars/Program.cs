@@ -71,7 +71,8 @@ namespace Cars
 			//}
 
 			
-			// QUERY-SYNTAX
+			// QUERY-SYNTAX - THIS IS THE PATTERN TO USE SINCE IT IS EASIER TO WRITE
+			// THAN THE EXTENSION-METHOD APPROACH
 			// INNER JOIN - *** IF right side is missing *** (i.e. no match on m.Name), it does not make it to the final results;
 			var car_man =
 				from car in cars
