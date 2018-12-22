@@ -72,11 +72,11 @@ namespace Cars
 
 			
 			// QUERY-SYNTAX
-			// INNER JOIN - IF right side is missing (i.e. no match on m.Name), it does not make it to the final results;
+			// INNER JOIN - *** IF right side is missing *** (i.e. no match on m.Name), it does not make it to the final results;
 			var car_man =
 				from car in cars
 				join m in manufacturers 
-					on car.Manufacturer equals m.Name // must use 'equals' keyword on the join 'on'
+					on car.Manufacturer equals m.Name // NOTE: must use 'equals' keyword on the join 'on'
 				orderby car.Combined descending, car.Name ascending
 				select new //transform into a projection which now has Headquarters
 				{
@@ -85,8 +85,7 @@ namespace Cars
 					car.Combined
 				};
 
-			// EXTENSION-METHOD SYNTAX
-			// JOIN SYNTAX
+			// JOIN EXTENSION-METHOD SYNTAX - THe pattern to follow!!!
 			var car_man_alt =
 				cars.Join(manufacturers, // 1. Join cars to manufacturers
 							c => c.Manufacturer, // 2. user these two props to link the tables
@@ -102,6 +101,8 @@ namespace Cars
 
 			foreach (var car in car_man_alt.Take(10)) { Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}"); }
 
+			Console.WriteLine("Done with test run. Press enter key...");
+			Console.ReadLine();
 		}
 
 		private static List<Car> ProcessCars(string path)
