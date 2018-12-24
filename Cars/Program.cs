@@ -31,6 +31,7 @@ namespace Cars
 		/// <param name="manufacturers"></param>
 		private static void AggregateData(List<Car> cars, List<Manufacturer> manufacturers)
 		{
+			// QUERY SYNTAX
 			// calculate min, max, avg
 			var query =
 				from car in cars
@@ -38,6 +39,7 @@ namespace Cars
 				into carGroup
 				select new
 				{
+					// Looping 3x
 					Count = carGroup.Count(),
 					Name = carGroup.Key,
 					Max = carGroup.Max(c => c.Combined),
@@ -47,7 +49,28 @@ namespace Cars
 				orderby result.Max descending
 				select result;
 
-			foreach (var result in query)
+			var query2 =
+				cars.GroupBy(c => c.Manufacturer)
+					.Select(g =>
+					{
+						// only looping 1x due to aggregator
+						var results = g.Aggregate(new CarStatistics(),
+							(acc, c) => acc.Accumulate(c),
+							acc => acc.Compute());
+						return new
+						{
+							//
+							Name = g.Key,
+							Avg = results.Average,
+							Max = results.Max,
+							Min = results.Min,
+							Count = results.Count
+						};
+					})
+					.OrderByDescending(r=>r.Max);
+
+
+			foreach (var result in query2)
 			{
 				Console.WriteLine($"{result.Name}");
 				Console.WriteLine($"\t Max: {result.Max}");
@@ -294,4 +317,37 @@ namespace Cars
             }
         }
     }
+
+	// For car aggregation
+	public class CarStatistics
+	{
+		public CarStatistics()
+		{
+			Max = int.MinValue;
+			Min = int.MaxValue;
+		}
+
+		public int Total { get; set; }
+		public int Max { get; set; }
+		public int Min { get; set; }
+		public double Average { get; set; }
+		public int Count { get; set; }
+
+		public CarStatistics Accumulate(Car car)
+		{
+			Total += car.Combined;
+			Count += 1;
+			Max = Math.Max(Max, car.Combined);
+			Min = Math.Min(Min, car.Combined);
+			return this;
+		}
+
+		public CarStatistics Compute()
+		{
+			Average = Total / Count;
+			return this;
+		}
+
+	}
+
 }
