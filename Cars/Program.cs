@@ -3,20 +3,132 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cars
 {
 	class Program
 	{
+		static List<Car> cars;
+		static List<Manufacturer> manufacturers;
+
 		static void Main(string[] args)
 		{
-		
-			// transform csv into car objects
-			var cars = ProcessCars("fuel.csv");
-			var manufacturers = ProcessManufacturers("manufacturers.csv");
+			InitTestData(); // transform csv into car objects
+			//CarsLinq(cars);
+			//CarJoinCode(cars, manufacturers);
+			//CarGrouping(cars, manufacturers);
+			CarGroupJoin(cars, manufacturers);
 
+			Console.WriteLine("Done with test run. Press enter key...");
+			Console.ReadLine();
+		}
+
+		private static void CarGroupJoin(List<Car> cars, List<Manufacturer> manufacturers)
+		{
+			// Query-Method Syntax for group join
+			var query =
+				from manufacturer in manufacturers
+				join car in cars on manufacturer.Name equals car.Manufacturer
+					into carGroup
+				orderby manufacturer.Name
+				select new // Project the data
+				{
+					Manufacturer = manufacturer,
+					Cars = carGroup
+				};
+
+			// extension method syntax for group join
+			var query2 =
+				manufacturers.GroupJoin(cars, m => m.Name, c => c.Manufacturer, (m, g) =>
+						new
+						{
+							Manufacturer = m,
+							Cars = g
+						})
+					.OrderBy(m => m.Manufacturer.Name);
+
+			foreach (var group in query2)
+			{
+				Console.WriteLine($"{group.Manufacturer.Name}:{group.Manufacturer.Headquarters}");
+				foreach (var car in group.Cars.OrderByDescending(c=>c.Combined).Take(2))
+				{
+					Console.WriteLine($"\t{car.Name} : {car.Combined}");
+				}
+			}
+		}
+
+		private static void CarGrouping(List<Car> cars, object munufacturers)
+		{
+			// Query-Method Syntax
+			var query =
+				from car in cars
+				group car by car.Manufacturer.ToUpper()
+				into manufacturer // placed into new dto so you can orderBy
+				orderby manufacturer.Key
+				select manufacturer;
+
+			// Extension-Method Syntax
+			var query2 =
+				cars.GroupBy(c => c.Manufacturer.ToUpper())
+					.OrderBy(g => g.Key);
+
+			foreach (var group in query2)
+			{
+				Console.WriteLine(group.Key);
+				foreach (var car in group.OrderByDescending(c=>c.Combined).Take(2))
+				{
+					Console.WriteLine($"\t{car.Name} : {car.Combined}");
+				}
+			}
+		}
+
+		private static void CarJoinCode(List<Car> cars, List<Manufacturer> manufacturers)
+		{
+			// QUERY-SYNTAX - THIS IS THE PATTERN TO USE SINCE IT IS EASIER TO WRITE
+			// THAN THE EXTENSION-METHOD APPROACH
+			// INNER JOIN - *** IF right side is missing *** (i.e. no match on m.Name), it does not make it to the final results;
+			var car_man =
+				from car in cars
+				join m in manufacturers
+					//on car.Manufacturer equals m.Name // NOTE: must use 'equals' keyword on the join 'on'
+					on new { car.Manufacturer, car.Year }
+					equals
+					new { Manufacturer = m.Name, m.Year } // prop names must match, using two join props
+				orderby car.Combined descending, car.Name ascending
+				select new //transform into a projection which now has Headquarters
+				{
+					m.Headquarters,
+					car.Name,
+					car.Combined
+				};
+
+			// JOIN EXTENSION-METHOD SYNTAX - A slightly more complex join pattern
+			var car_man_alt =
+				cars.Join(manufacturers, // 1. Join cars to manufacturers
+										 //c => c.Manufacturer, // 2. user these two props to link the tables
+										 //m => m.Name, (c, m) => new // 3. create a new third object to contain the following
+							c => new { c.Manufacturer, c.Year },
+							m => new { Manufacturer = m.Name, m.Year }, // JOIN ON TWO PROPS
+							(c, m) => new
+							{
+								m.Headquarters,
+								c.Name,
+								c.Combined
+							}) // now, you can contine but you must use the new third object
+					.OrderByDescending(c => c.Combined)
+					.ThenBy(c => c.Name);
+
+			foreach (var car in car_man_alt.Take(10)) { Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}"); }
+		}
+
+		private static void InitTestData()
+		{
+			cars = ProcessCars("fuel.csv");
+			manufacturers = ProcessManufacturers("manufacturers.csv");
+		}
+
+		private static void CarsLinq(List<Car> cars)
+		{
 			// query syntax
 			var query1 =
 				from car in cars
@@ -36,15 +148,15 @@ namespace Cars
 
 			// FirstOrDefault() ... LastOrDefault() ... First()... Last()...
 			var top =
-					cars
-						.OrderByDescending(c => c.Combined)
-						.ThenBy(c => c.Name)
-						.Select(c => c)
-						.FirstOrDefault(c => c.Manufacturer == "BMW" && c.Year == 2016); // immediate execution
+				cars
+					.OrderByDescending(c => c.Combined)
+					.ThenBy(c => c.Name)
+					.Select(c => c)
+					.FirstOrDefault(c => c.Manufacturer == "BMW" && c.Year == 2016); // immediate execution
 			sw.Stop();
 			Console.WriteLine($"Elapsed time for query = {sw.ElapsedTicks.ToString()}");
 			Console.WriteLine($"top: name={top?.Name} : Combined={top?.Combined} mpg");
-	
+
 			// Any
 			var result = cars.Any(c => c.Manufacturer == "Ford");
 			Console.WriteLine($"Any cars are Ford: {result}");
@@ -69,46 +181,6 @@ namespace Cars
 			//{
 			//	Console.WriteLine($"{car.Name} : {car.Combined}");
 			//}
-
-			
-			// QUERY-SYNTAX - THIS IS THE PATTERN TO USE SINCE IT IS EASIER TO WRITE
-			// THAN THE EXTENSION-METHOD APPROACH
-			// INNER JOIN - *** IF right side is missing *** (i.e. no match on m.Name), it does not make it to the final results;
-			var car_man =
-				from car in cars
-				join m in manufacturers 
-					//on car.Manufacturer equals m.Name // NOTE: must use 'equals' keyword on the join 'on'
-					on new { car.Manufacturer, car.Year}
-					equals
-					new { Manufacturer = m.Name, m.Year } // prop names must match, using two join props
-				orderby car.Combined descending, car.Name ascending
-				select new //transform into a projection which now has Headquarters
-				{
-					m.Headquarters,
-					car.Name,
-					car.Combined
-				};
-
-			// JOIN EXTENSION-METHOD SYNTAX - A slightly more complex join pattern
-			var car_man_alt =
-				cars.Join(manufacturers, // 1. Join cars to manufacturers
-							//c => c.Manufacturer, // 2. user these two props to link the tables
-							//m => m.Name, (c, m) => new // 3. create a new third object to contain the following
-							c => new { c.Manufacturer, c.Year},
-							m => new { Manufacturer = m.Name, m.Year }, // JOIN ON TWO PROPS
-							(c,m) => new			
-							{
-								m.Headquarters,
-								c.Name,
-								c.Combined
-							}) // now, you can contine but you must use the new third object
-					.OrderByDescending(c => c.Combined)
-					.ThenBy(c => c.Name);
-
-			foreach (var car in car_man_alt.Take(10)) { Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}"); }
-
-			Console.WriteLine("Done with test run. Press enter key...");
-			Console.ReadLine();
 		}
 
 		private static List<Car> ProcessCars(string path)
