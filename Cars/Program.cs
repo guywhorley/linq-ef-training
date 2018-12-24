@@ -17,10 +17,44 @@ namespace Cars
 			//CarsLinq(cars);
 			//CarJoinCode(cars, manufacturers);
 			//CarGrouping(cars, manufacturers);
-			CarGroupJoin(cars, manufacturers);
+			//CarGroupJoin(cars, manufacturers);
+			AggregateData(cars, manufacturers);
 
 			Console.WriteLine("Done with test run. Press enter key...");
 			Console.ReadLine();
+		}
+
+		/// <summary>
+		/// Sum, count, average, min, max
+		/// </summary>
+		/// <param name="cars"></param>
+		/// <param name="manufacturers"></param>
+		private static void AggregateData(List<Car> cars, List<Manufacturer> manufacturers)
+		{
+			// calculate min, max, avg
+			var query =
+				from car in cars
+				group car by car.Manufacturer
+				into carGroup
+				select new
+				{
+					Count = carGroup.Count(),
+					Name = carGroup.Key,
+					Max = carGroup.Max(c => c.Combined),
+					Min = carGroup.Min(c => c.Combined),
+					Avg = carGroup.Average(c => c.Combined)
+				} into result
+				orderby result.Max descending
+				select result;
+
+			foreach (var result in query)
+			{
+				Console.WriteLine($"{result.Name}");
+				Console.WriteLine($"\t Max: {result.Max}");
+				Console.WriteLine($"\t Min: {result.Min}");
+				Console.WriteLine($"\t Avg: {result.Avg}");
+				Console.WriteLine($"\t Cnt: {result.Count}");
+			}
 		}
 
 		private static void CarGroupJoin(List<Car> cars, List<Manufacturer> manufacturers)
@@ -35,8 +69,21 @@ namespace Cars
 				{
 					Manufacturer = manufacturer,
 					Cars = carGroup
-				};
+				}
+				into result
+				group result by result.Manufacturer.Headquarters;
 
+			foreach (var group in query)
+			{
+				Console.WriteLine($"{group.Key}");
+				foreach (var car in group.SelectMany(g=>g.Cars) // flatten
+										 .OrderByDescending(c=>c.Combined)
+										 .Take(3))
+				{
+					Console.WriteLine($"\t{car.Name} : {car.Combined}");
+				}
+			}
+			
 			// extension method syntax for group join
 			var query2 =
 				manufacturers.GroupJoin(cars, m => m.Name, c => c.Manufacturer, (m, g) =>
@@ -223,7 +270,7 @@ namespace Cars
 			return query.ToList();
 		}
 	}
-
+	
 	public static class CarExtensions
     {       
 		// Transform i.e. project a line from car csv into a new car
