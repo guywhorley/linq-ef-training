@@ -56,7 +56,7 @@ namespace Cars
 			// TRANSFORM INLINE ANONYMOUS OBJECT (a custom DTO)
 			// Transform cars from one structure into another
 			//var transformed = cars.Select(c => new {c.Name, c.Manufacturer, c.Combined});
-			//foreach (var car in transformed.Take(10))
+			//foreach (var car in transformed.Take(10)) // the transformed object is now known as car.
 			//{
 			//	Console.WriteLine($"car: [Name:{car.Name}] [Maker:{car.Manufacturer}] [Combined:{car.Combined} mpg]");
 			//}
@@ -77,7 +77,10 @@ namespace Cars
 			var car_man =
 				from car in cars
 				join m in manufacturers 
-					on car.Manufacturer equals m.Name // NOTE: must use 'equals' keyword on the join 'on'
+					//on car.Manufacturer equals m.Name // NOTE: must use 'equals' keyword on the join 'on'
+					on new { car.Manufacturer, car.Year}
+					equals
+					new { Manufacturer = m.Name, m.Year } // prop names must match, using two join props
 				orderby car.Combined descending, car.Name ascending
 				select new //transform into a projection which now has Headquarters
 				{
@@ -89,9 +92,11 @@ namespace Cars
 			// JOIN EXTENSION-METHOD SYNTAX - A slightly more complex join pattern
 			var car_man_alt =
 				cars.Join(manufacturers, // 1. Join cars to manufacturers
-							c => c.Manufacturer, // 2. user these two props to link the tables
-							m => m.Name, 
-							(c, m) => new // 3. create a new third object to contain the following
+							//c => c.Manufacturer, // 2. user these two props to link the tables
+							//m => m.Name, (c, m) => new // 3. create a new third object to contain the following
+							c => new { c.Manufacturer, c.Year},
+							m => new { Manufacturer = m.Name, m.Year }, // JOIN ON TWO PROPS
+							(c,m) => new			
 							{
 								m.Headquarters,
 								c.Name,
