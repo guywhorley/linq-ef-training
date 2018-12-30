@@ -45,12 +45,16 @@ namespace Cars
 			db.Database.Log = Console.WriteLine;
 
 			// define the query with query syntax
-			var query =
-				from car in db.Cars
-				orderby car.Combined descending, car.Name ascending
-				select car;
+			//var query =
+			//	from car in db.Cars
+			//	orderby car.Combined descending, car.Name ascending
+			//	select car;
 
-			foreach (var car in query.Take(10))
+			// Extension Method Syntax
+			var query2 =
+				db.Cars.OrderByDescending(c => c.Combined).ThenBy(c => c.Name).Take(10);
+
+			foreach (var car in query2) //.Take(10))
 			{
 				Console.WriteLine($"{car.Name} : {car.Combined}");
 			}
