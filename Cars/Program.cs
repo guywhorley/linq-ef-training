@@ -13,18 +13,33 @@ namespace Cars
 		static List<Manufacturer> manufacturers;
 
 		static void Main(string[] args)
-		{
+		{	
 			CreateFuelXml();
+			QueryXMl();
 
-			InitTestData(); // transform csv into car objects
+			//InitTestData(); // transform csv into car objects
 			//CarsLinq(cars);
 			//CarJoinCode(cars, manufacturers);
 			//CarGrouping(cars, manufacturers);
 			//CarGroupJoin(cars, manufacturers);
-			AggregateData(cars, manufacturers);
+			//AggregateData(cars, manufacturers);
 
 			Console.WriteLine("Done with test run. Press enter key...");
 			Console.ReadLine();
+		}
+
+		// TODO: Query XML Document via LINQ
+		private static void QueryXMl()
+		{
+			var document = XDocument.Load("fuel.xml"); // get xml file into memory
+			var query =
+				from element in document.Element("Cars").Elements("Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
+				where element.Attribute("Manufacturer").Value == "BMW"
+				select element.Attribute("Name").Value;
+			foreach (var name in query)
+			{
+				Console.WriteLine($"Cars made by BMW: {name}");
+			}
 		}
 
 		// TODO: Example of XML API => CREATING XML DOCUMENT
@@ -222,9 +237,6 @@ namespace Cars
 		private static void InitTestData()
 		{
 			cars = ProcessCars("fuel.csv");
-
-
-
 			manufacturers = ProcessManufacturers("manufacturers.csv");
 		}
 
