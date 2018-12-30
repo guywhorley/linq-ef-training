@@ -8,6 +8,10 @@ namespace Cars
 {
     public class Car
     {
+		// TODO: EF identity column / primary key
+		// for ef, add 'Id' property to function as primary key
+	    public int Id { get; set; }
+
         public int Year { get; set; }
         public string Manufacturer { get; set; }
         public string Name { get; set; }

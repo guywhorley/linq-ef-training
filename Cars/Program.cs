@@ -14,8 +14,8 @@ namespace Cars
 
 		static void Main(string[] args)
 		{	
-			CreateFuelXml();
-			QueryXMl();
+			//CreateFuelXml();
+			//QueryXMl();
 
 			//InitTestData(); // transform csv into car objects
 			//CarsLinq(cars);
