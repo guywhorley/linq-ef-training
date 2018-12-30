@@ -40,7 +40,10 @@ namespace Cars
 				//from element in document.Descendants("Car") // all cars in document
 				// following is example of using top level element and navigating explicitly.
 				// LINQ stitches together the namespace and knows how to get at the right elements
-				from element in document.Element(ns + "Cars").Elements(ex + "Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
+				// TODO: Example of null coelescing and returning and empty sequence.
+				// TODO: Example of RETURN AND EMPTY LIST OF IENUMERABLE<T>
+				from element in document.Element(ns + "Cars")?.Elements(ex + "Car") ?? Enumerable.Empty<XElement>()
+				// .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
 				where element.Attribute("Manufacturer")?.Value == "BMW"
 				select element.Attribute("Name")?.Value;
 			foreach (var name in query)
