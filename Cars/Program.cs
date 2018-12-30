@@ -15,7 +15,7 @@ namespace Cars
 		static void Main(string[] args)
 		{	
 			CreateFuelXml();
-			//QueryXMl();
+			QueryXMl();
 
 			//InitTestData(); // transform csv into car objects
 			//CarsLinq(cars);
@@ -29,13 +29,18 @@ namespace Cars
 		}
 
 		// TODO: Query XML Document via LINQ
+		// TODO: Using namespaces in query
 		private static void QueryXMl()
 		{
+			var ns = (XNamespace)"http://whogu01.com/cars/2018";
+			var ex = (XNamespace) "http://whogu01.com/cars/2018/ex";
+
 			var document = XDocument.Load("fuel.xml"); // get xml file into memory
 			var query =
 				//from element in document.Descendants("Car") // all cars in document
 				// following is example of using top level element and navigating explicitly.
-				from element in document.Element("Cars").Elements("Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
+				// LINQ stitches together the namespace and knows how to get at the right elements
+				from element in document.Element(ns + "Cars").Elements(ex + "Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
 				where element.Attribute("Manufacturer")?.Value == "BMW"
 				select element.Attribute("Name")?.Value;
 			foreach (var name in query)
@@ -52,6 +57,7 @@ namespace Cars
 			// convert to XNamespace class
 			var ns = (XNamespace)"http://whogu01.com/cars/2018";
 			var ex = (XNamespace) "http://whogu01.com/cars/2018/ex";
+
 			var records = ProcessCars("fuel.csv");
 			var document = new XDocument();
 			// TODO: using LINQ to create compact code for xml doc
@@ -64,6 +70,9 @@ namespace Cars
 									new XAttribute("Highway", record.Highway),
 									new XAttribute("Combined", record.Combined),
 									new XAttribute("Manufacturer", record.Manufacturer)));
+			// add namespace prefix
+			cars.Add(new XAttribute(XNamespace.Xmlns + "ex", ex));
+			
 			// create the document
 			document.Add(cars);
 			document.Save("fuel.xml");
