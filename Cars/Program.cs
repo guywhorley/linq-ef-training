@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Cars
 {
@@ -13,6 +14,8 @@ namespace Cars
 
 		static void Main(string[] args)
 		{
+			CreateFuelXml();
+
 			InitTestData(); // transform csv into car objects
 			//CarsLinq(cars);
 			//CarJoinCode(cars, manufacturers);
@@ -22,6 +25,35 @@ namespace Cars
 
 			Console.WriteLine("Done with test run. Press enter key...");
 			Console.ReadLine();
+		}
+
+		private static void CreateFuelXml()
+		{ 
+			var records = ProcessCars("fuel.csv");
+			/*
+				<Cars>
+					<Car>
+						<Name>abc</Name>
+						<Combined>21</Combined>
+					</Car>
+				</Cars>
+			*/
+			var document = new XDocument();
+			var cars = new XElement("Cars");
+			// a long way to do this
+			foreach (var record in records)
+			{
+				var car = new XElement("Car");
+				var name = new XElement("Name",record.Name);
+				var combined = new XElement("Combined", record.Combined);
+				car.Add(name);
+				car.Add(combined);
+				// add car to cars element
+				cars.Add(car);
+			}
+			// create the document
+			document.Add(cars);
+			document.Save("fuel.xml");
 		}
 
 		/// <summary>
@@ -194,6 +226,9 @@ namespace Cars
 		private static void InitTestData()
 		{
 			cars = ProcessCars("fuel.csv");
+
+
+
 			manufacturers = ProcessManufacturers("manufacturers.csv");
 		}
 
