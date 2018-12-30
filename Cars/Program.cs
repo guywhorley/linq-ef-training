@@ -37,6 +37,7 @@ namespace Cars
 			// TODO: Replacing foreach with a LINQ select
 			var cars = new XElement("Cars",
 							from record in records
+							// using projection for FUNCTIONAL CONSTRUCTION
 							select new XElement("Car",
 									new XAttribute("Name", record.Name),
 									new XAttribute("Highway", record.Highway),
