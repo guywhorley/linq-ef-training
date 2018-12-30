@@ -50,13 +50,24 @@ namespace Cars
 			//	orderby car.Combined descending, car.Name ascending
 			//	select car;
 
-			// Extension Method Syntax
-			var query2 =
-				db.Cars.OrderByDescending(c => c.Combined).ThenBy(c => c.Name).Take(10);
+			// TODO: IEnumerable ops ***ALWAYS*** occurs in memory. IQueryable NOT IN MEMORY.
+			// ** Keep in mind that you can convert IQuery... to IEnum by a ToList(), then any further ops
+			// will be in memory. 
 
-			foreach (var car in query2) //.Take(10))
+			// Extension Method Syntax
+			// Linq "magically" translates each of these operations into the sql query
+			var query2 =
+				db.Cars
+					.Where(c=>c.Manufacturer == "BMW") // IQueryable (instead of IEnumerable)
+					.OrderByDescending(c => c.Combined)
+					.ThenBy(c => c.Name)
+					.Take(10)
+					.Select(c=>new { Name = c.Name.ToUpper() })
+					.ToList(); // ** (converts to in-memory list)
+
+			foreach (var car in query2) //query.Take(10))
 			{
-				Console.WriteLine($"{car.Name} : {car.Combined}");
+				Console.WriteLine($"{car.Name}"); //: {car.Combined}");
 			}
 		}
 
