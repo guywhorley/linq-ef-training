@@ -33,26 +33,15 @@ namespace Cars
 		{ 
 			var records = ProcessCars("fuel.csv");
 			var document = new XDocument();
-			var cars = new XElement("Cars");
-			
-			var elements
-				from record in records
-				select new XElement("Car",
-						new XAttribute("Name", record.Name),
-						new XAttribute("Combined", record.Combined),
-						new XAttribute("Manufacturer", record.Manufacturer));
-			cars.Add(elements);
-
-			// TODO: (Hint) When to use LINQ: *** WHEN YOU HAVE A FOREACH LOOP THRU A COLLECTION ***
-			//foreach (var record in records)
-			//{	// "FUNCTIONAL CONSTRUCTION"
-			//	var car = new XElement("Car",
-			//					new XAttribute("Name", record.Name),
-			//					new XAttribute("Combined", record.Combined),
-			//					new XAttribute("Manufacturer", record.Manufacturer));
-			//	// add car to cars element
-			//	cars.Add(car);
-			//}
+			// TODO: using LINQ to create compact code for xml doc
+			// TODO: Replacing foreach with a LINQ select
+			var cars = new XElement("Cars",
+							from record in records
+							select new XElement("Car",
+									new XAttribute("Name", record.Name),
+									new XAttribute("Highway", record.Highway),
+									new XAttribute("Combined", record.Combined),
+									new XAttribute("Manufacturer", record.Manufacturer)));
 			// create the document
 			document.Add(cars);
 			document.Save("fuel.xml");
