@@ -27,6 +27,7 @@ namespace Cars
 			Console.ReadLine();
 		}
 
+		// Using XmlDocument Api approach (No LINQ)
 		private static void CreateFuelXml()
 		{ 
 			var records = ProcessCars("fuel.csv");
@@ -42,12 +43,10 @@ namespace Cars
 			var cars = new XElement("Cars");
 			// a long way to do this
 			foreach (var record in records)
-			{
-				var car = new XElement("Car");
-				var name = new XElement("Name",record.Name);
-				var combined = new XElement("Combined", record.Combined);
-				car.Add(name);
-				car.Add(combined);
+			{	
+				var name = new XAttribute("Name", record.Name);
+				var combined = new XAttribute("Combined", record.Combined);
+				var car = new XElement("Car", name, combined);
 				// add car to cars element
 				cars.Add(car);
 			}
