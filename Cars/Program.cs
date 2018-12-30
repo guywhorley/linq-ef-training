@@ -15,7 +15,7 @@ namespace Cars
 		static void Main(string[] args)
 		{	
 			CreateFuelXml();
-			QueryXMl();
+			//QueryXMl();
 
 			//InitTestData(); // transform csv into car objects
 			//CarsLinq(cars);
@@ -48,14 +48,18 @@ namespace Cars
 		// Using XmlDocument Api approach (No LINQ)
 		private static void CreateFuelXml()
 		{ 
+			// TODO: Example of using a namespace 
+			// convert to XNamespace class
+			var ns = (XNamespace)"http://whogu01.com/cars/2018";
+			var ex = (XNamespace) "http://whogu01.com/cars/2018/ex";
 			var records = ProcessCars("fuel.csv");
 			var document = new XDocument();
 			// TODO: using LINQ to create compact code for xml doc
 			// TODO: Replacing foreach with a LINQ select
-			var cars = new XElement("Cars",
+			var cars = new XElement(ns + "Cars", // this syntax MUST be used for namespace (no interpoation)
 							from record in records
 							// using projection for FUNCTIONAL CONSTRUCTION
-							select new XElement("Car",
+							select new XElement(ex + "Car", // must include namespace
 									new XAttribute("Name", record.Name),
 									new XAttribute("Highway", record.Highway),
 									new XAttribute("Combined", record.Combined),
