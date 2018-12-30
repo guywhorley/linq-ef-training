@@ -33,8 +33,9 @@ namespace Cars
 		{
 			var document = XDocument.Load("fuel.xml"); // get xml file into memory
 			var query =
-				from element in document.Descendants("Car") 
-				//from element in document.Element("Cars").Elements("Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
+				//from element in document.Descendants("Car") // all cars in document
+				// following is example of using top level element and navigating explicitly.
+				from element in document.Element("Cars").Elements("Car") // .Elements("Car") returns an IEnumberable, thus we can use LINQ From to iteate over the collection.
 				where element.Attribute("Manufacturer")?.Value == "BMW"
 				select element.Attribute("Name")?.Value;
 			foreach (var name in query)
