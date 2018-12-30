@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,13 @@ namespace Cars
 		static List<Manufacturer> manufacturers;
 
 		static void Main(string[] args)
-		{	
+		{
+			Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CarDb>());
+			InsertData();
+			QueryData();
+
+			#region older chapters
+
 			//CreateFuelXml();
 			//QueryXMl();
 
@@ -24,8 +31,46 @@ namespace Cars
 			//CarGroupJoin(cars, manufacturers);
 			//AggregateData(cars, manufacturers);
 
+			#endregion
+
 			Console.WriteLine("Done with test run. Press enter key...");
 			Console.ReadLine();
+		}
+
+		private static void QueryData()
+		{
+			// get an instance of CarDb
+			var db = new CarDb();
+			// TODO: Example of using Database.Log to writeout db operations
+			db.Database.Log = Console.WriteLine;
+
+			// define the query with query syntax
+			var query =
+				from car in db.Cars
+				orderby car.Combined descending, car.Name ascending
+				select car;
+
+			foreach (var car in query.Take(10))
+			{
+				Console.WriteLine($"{car.Name} : {car.Combined}");
+			}
+		}
+
+		private static void InsertData()
+		{
+			//var cars = ProcessCars("fuel.csv");
+			var db = new CarDb();
+			db.Database.Log = Console.WriteLine;
+			if (!db.Cars.Any())
+			{
+				var cars = ProcessCars("fuel.csv");
+				foreach (var car in cars)
+				{
+					db.Cars.Add(car);
+				}
+				// insert the cars into the table.
+				db.SaveChanges();
+			}
 		}
 
 		// TODO: Query XML Document via LINQ
