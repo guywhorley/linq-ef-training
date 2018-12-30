@@ -27,26 +27,21 @@ namespace Cars
 			Console.ReadLine();
 		}
 
+		// TODO: Example of XML API => CREATING XML DOCUMENT
 		// Using XmlDocument Api approach (No LINQ)
 		private static void CreateFuelXml()
 		{ 
 			var records = ProcessCars("fuel.csv");
-			/*
-				<Cars>
-					<Car>
-						<Name>abc</Name>
-						<Combined>21</Combined>
-					</Car>
-				</Cars>
-			*/
 			var document = new XDocument();
 			var cars = new XElement("Cars");
-			// a long way to do this
+			
+			// TODO: (Hint) When to use LINQ: *** WHEN YOU HAVE A FOREACH LOOP THRU A COLLECTION ***
 			foreach (var record in records)
-			{	
+			{	// "FUNCTIONAL CONSTRUCTION"
 				var car = new XElement("Car",
 								new XAttribute("Name", record.Name),
-								new XAttribute("Combined", record.Combined));
+								new XAttribute("Combined", record.Combined),
+								new XAttribute("Manufacturer", record.Manufacturer));
 				// add car to cars element
 				cars.Add(car);
 			}
@@ -62,6 +57,7 @@ namespace Cars
 		/// <param name="manufacturers"></param>
 		private static void AggregateData(List<Car> cars, List<Manufacturer> manufacturers)
 		{
+			//TODO: LINQ AGGREGATION: MIN,MAX,AVG,COUNT
 			// QUERY SYNTAX
 			// calculate min, max, avg
 			var query =
@@ -113,6 +109,7 @@ namespace Cars
 
 		private static void CarGroupJoin(List<Car> cars, List<Manufacturer> manufacturers)
 		{
+			// TODO: LINQ GROUP-JOIN
 			// Query-Method Syntax for group join
 			var query =
 				from manufacturer in manufacturers
@@ -160,6 +157,7 @@ namespace Cars
 
 		private static void CarGrouping(List<Car> cars, object munufacturers)
 		{
+			//TODO: LINQ GROUPING, ORDERBY
 			// Query-Method Syntax
 			var query =
 				from car in cars
@@ -185,6 +183,7 @@ namespace Cars
 
 		private static void CarJoinCode(List<Car> cars, List<Manufacturer> manufacturers)
 		{
+			// TODO: LINQ JOIN
 			// QUERY-SYNTAX - THIS IS THE PATTERN TO USE SINCE IT IS EASIER TO WRITE
 			// THAN THE EXTENSION-METHOD APPROACH
 			// INNER JOIN - *** IF right side is missing *** (i.e. no match on m.Name), it does not make it to the final results;
