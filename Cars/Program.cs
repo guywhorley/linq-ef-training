@@ -53,10 +53,24 @@ namespace Cars
 						Cars = g.OrderByDescending(c=>c.Combined).Take(2)
 					});
 
+			// TODO: Using Query Method syntax approach
+			var query2 =
+				from car in db.Cars
+				// when grouping, you lose access to the car variable thus must project into a new structure
+				group car by car.Manufacturer
+				into manufacturer
+				select new
+				{
+					Name = manufacturer.Key,
+					Cars = (from car in manufacturer
+						orderby car.Combined descending
+						select car).Take(2)
+				};
+
 			// Iterate through all cars, group acc. to Manufacturer, then create a new projection for the group,
 			// and iterate over the group, writing out the group and the cars in each group. THe group has an
 			// IEnumerable<Cars> Cars. 
-			foreach (var group in query)
+			foreach (var group in query2)
 			{
 				Console.WriteLine($"{group.Name}");
 				foreach (var car in group.Cars)
