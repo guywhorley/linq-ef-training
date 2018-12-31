@@ -44,6 +44,27 @@ namespace Cars
 			// TODO: Example of using Database.Log to writeout db operations
 			db.Database.Log = Console.WriteLine;
 
+			// TODO: Advanced LINQ Query using Extension Method syntax
+			var query =
+				db.Cars.GroupBy(c => c.Manufacturer)
+					.Select(g => new // in a grouping, the group is organized by "Key"
+					{
+						Name = g.Key,
+						Cars = g.OrderByDescending(c=>c.Combined).Take(2)
+					});
+
+			// Iterate through all cars, group acc. to Manufacturer, then create a new projection for the group,
+			// and iterate over the group, writing out the group and the cars in each group. THe group has an
+			// IEnumerable<Cars> Cars. 
+			foreach (var group in query)
+			{
+				Console.WriteLine($"{group.Name}");
+				foreach (var car in group.Cars)
+				{
+					Console.WriteLine($"\t{car.Name} : {car.Combined}");
+				}
+			}
+
 			// define the query with query syntax
 			//var query =
 			//	from car in db.Cars
@@ -56,19 +77,20 @@ namespace Cars
 
 			// Extension Method Syntax
 			// Linq "magically" translates each of these operations into the sql query
-			var query2 =
-				db.Cars
-					.Where(c=>c.Manufacturer == "BMW") // IQueryable (instead of IEnumerable)
-					.OrderByDescending(c => c.Combined)
-					.ThenBy(c => c.Name)
-					.Take(10)
-					.Select(c=>new { Name = c.Name.ToUpper() })
-					.ToList(); // ** (converts to in-memory list)
+			
+			//var query2 =
+			//	db.Cars
+			//		.Where(c=>c.Manufacturer == "BMW") // IQueryable (instead of IEnumerable)
+			//		.OrderByDescending(c => c.Combined)
+			//		.ThenBy(c => c.Name)
+			//		.Take(10)
+			//		.Select(c=>new { Name = c.Name.ToUpper() })
+			//		.ToList(); // ** (converts to in-memory list)
 
-			foreach (var car in query2) //query.Take(10))
-			{
-				Console.WriteLine($"{car.Name}"); //: {car.Combined}");
-			}
+			//foreach (var car in query2) //query.Take(10))
+			//{
+			//	Console.WriteLine($"{car.Name}"); //: {car.Combined}");
+			//}
 		}
 
 		private static void InsertData()
